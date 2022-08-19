@@ -1,7 +1,8 @@
-storage
+storage/*
 .env
 __pycache__/
 .DS_Store
+.venv
 venv
 .vscode
 requirements.txt

@@ -16,7 +16,7 @@ class Context:
         # The last response's id from the chatbot
         self.last_resp = last_resp
 
-        # The last message from the user
+        # The mesh id of the last response from the chatbot
         self.last_msg = last_msg
 
     def update(self, msg: str):

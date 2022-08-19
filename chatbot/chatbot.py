@@ -1,3 +1,10 @@
+import nltk
+
+downloads = ("stopwords", "punkt")
+
+for d in downloads:
+    nltk.download(d)
+
 import os
 import pickle
 import random
@@ -76,7 +83,7 @@ class Mesh(Storage):
         self, words: set[str], attr: str, ignore: set = set()
     ) -> tuple[str, set]:
 
-        for data in self.data.values():
+        for _id, data in self.data.items():
 
             k = getattr(data, attr)
 
@@ -91,14 +98,13 @@ class Mesh(Storage):
             if not resps_left:
                 continue
 
-            yield data, shared
+            yield _id, data, shared, resps_left
 
     def find_mesh_from_keywords(self, keywords: set[str], ignore=None):
         # TODO: take into account synonyms
         return self._find_mesh(keywords, attr="keywords", ignore=ignore)
 
     def find_mesh_from_stop_words(self, stop_words: set[str], ignore=None):
-
         return self._find_mesh(stop_words, attr="stop_words", ignore=ignore)
 
     def add_new_mesh(self, _id: str, keywords: set, stop_words: set):
@@ -281,16 +287,16 @@ class Chatbot:
                 # Picking a random response
                 resp_id = random.choice(tuple(resps.keys()))
 
-                return resp_id, resps[resp_id]
+                return None, resp_id, resps[resp_id]
 
         # Weighing and sorting the results
-        sorted_results = sorted(results, key=lambda x: len(x[1]), reverse=True)
+        sorted_results = sorted(results, key=lambda x: len(x[2]), reverse=True)
 
         # Picking the top responses that are within a percentage threshold of the best one
-        best_score = len(sorted_results[0][1])
+        best_score = len(sorted_results[0][2])
         min_score = best_score * config.response_threshold
 
-        elligible_results = [r for r in sorted_results if len(r[1]) >= min_score]
+        elligible_results = [r for r in sorted_results if len(r[2]) >= min_score]
 
         weights = []
 
@@ -298,30 +304,25 @@ class Chatbot:
 
             if keyword_query:
                 # Adding weight with prevelance of shared stop words
-                stop_words = stop_words & set(r[0].stop_words)
+                stop_words = stop_words & set(r[1].stop_words)
 
-            weights.append(len(r[1]) + len(stop_words))
+            weights.append(len(r[2]) + len(stop_words))
 
         # Weighted random choice to pick the response
         (link,) = random.choices(elligible_results, weights=weights, k=1)
 
-        link = link[0]
+        mesh_id, link, _, resps_left = link
 
         resps = set()
 
         # Trying to find a response based on what the user previously said
         if ctx.last_msg is not None:
-            last_msg_tokens = self.tokenize_msg(ctx.last_msg)
+            # Finding the response ids that have the same previous message id
+            common_resps = {
+                _id for _id in resps_left if ctx.last_msg in link.resps[_id]
+            }
 
-            # Finding the response id of the message
-            last_msg_id = self.resps.get_resp_from_tokens(last_msg_tokens)
-
-            if last_msg_id is not None:
-
-                # Finding the response ids that have the same previous message id
-                common_resps = {_id for _id, prev in link.resps if last_msg_id in prev}
-
-                resps.update(common_resps)
+            resps.update(common_resps)
 
         resps = tuple(resps if resps else link.resps)
 
@@ -330,7 +331,7 @@ class Chatbot:
 
         resp = self.resps.get_resp_from_id(resp_id)
 
-        return resp_id, resp
+        return mesh_id, resp_id, resp
 
     def save_data(self):
         self.mesh.save_data()
