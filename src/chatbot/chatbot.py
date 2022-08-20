@@ -1,20 +1,15 @@
-import nltk
-
-downloads = ("stopwords", "punkt")
-
-for d in downloads:
-    nltk.download(d)
-
 import os
 import pickle
 import random
 import string
 import uuid
 
-import config
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+
+import config
 
 from .context import Context, Message
 
@@ -23,8 +18,15 @@ STOP_WORDS = set(stopwords.words("english"))
 EXTENSION = "thomas"
 
 
+def download_nltk_data():
+    downloads = ("stopwords", "punkt")
+
+    for d in downloads:
+        nltk.download(d, quiet=True)
+
+
 def _load_storage_file(name: str):
-    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
+    directory = f"../{config.storage_dir}/{name}.{EXTENSION}"
 
     if not os.path.exists(directory):
         return None
@@ -34,7 +36,7 @@ def _load_storage_file(name: str):
 
 
 def _save_storage_file(name: str, data: dict):
-    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
+    directory = f"../{config.storage_dir}/{name}.{EXTENSION}"
 
     with open(directory, "wb") as f:
         return pickle.dump(data, f)

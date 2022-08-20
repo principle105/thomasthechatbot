@@ -157,6 +157,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "termcolor-whl"
+version = "1.1.2"
+description = "ANSI Color formatting for output in terminal, successor to termcolor (has wheels!)"
+category = "main"
+optional = false
+python-versions = ">=2.6"
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -214,10 +222,21 @@ category = "main"
 optional = false
 python-versions = "*"
 
+[[package]]
+name = "yaspin"
+version = "2.2.0"
+description = "Yet Another Terminal Spinner"
+category = "main"
+optional = false
+python-versions = ">=3.7.2,<4.0.0"
+
+[package.dependencies]
+termcolor-whl = "1.1.2"
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "386a89bfef0dfcbf3dbf90ec4c888c8223e2b92ca0bc37424f0a6d57d5cde94c"
+content-hash = "41f4219128677bc5a3d202814f275a2077e11e3403e81cb64a949e4b35c4962b"
 
 [metadata.files]
 black = []
@@ -251,6 +270,7 @@ platformdirs = [
 ]
 prompt-toolkit = []
 regex = []
+termcolor-whl = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
@@ -262,3 +282,4 @@ wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
     {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
+yaspin = []

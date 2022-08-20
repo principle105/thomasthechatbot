@@ -3,16 +3,27 @@ name = "thomasthechatbot"
 version = "0.1.0"
 description = "thomas the chatbot"
 authors = ["principle105 <principle105@gmail.com>"]
+packages = [
+    { include = "*", from =  "src"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 nltk = "^3.7"
 typer = "^0.6.1"
 inquirerpy = "^0.3.4"
+yaspin = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
 black = "^22.6.0"
+
+[tool.poetry.scripts]
+ttc = "cli:app"
+
+[tool.isort]
+multi_line_output = 3
+profile = "black"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
