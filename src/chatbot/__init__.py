@@ -1,2 +1,2 @@
-from .chatbot import Chatbot, download_nltk_data
+from .chatbot import Chatbot
 from .context import Context, Message

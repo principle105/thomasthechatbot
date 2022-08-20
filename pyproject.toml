@@ -3,6 +3,7 @@ name = "thomasthechatbot"
 version = "0.1.0"
 description = "thomas the chatbot"
 authors = ["principle105 <principle105@gmail.com>"]
+license = "MIT"
 packages = [
     { include = "*", from =  "src"},
 ]

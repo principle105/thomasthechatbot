@@ -1,10 +1,9 @@
+import nltk
 import typer
 from InquirerPy import inquirer
 from InquirerPy.utils import color_print
 from InquirerPy.validator import EmptyInputValidator
 from yaspin import yaspin
-
-from chatbot import Chatbot, Context, Message, download_nltk_data
 
 # Initializing the CLI
 app = typer.Typer()
@@ -28,11 +27,27 @@ class Sender:
         color_print([("", text)])
 
 
+def download_nltk_data():
+    downloads = (
+        "stopwords",
+        "punkt",
+        "wordnet",
+        "averaged_perceptron_tagger",
+        "omw-1.4",
+    )
+
+    for d in downloads:
+        nltk.download(d, quiet=True)
+
+
 @app.command()
 def start():
     with yaspin(text="Loading", color="cyan") as sp:
         download_nltk_data()
         sp.write("- Downloaded data")
+
+        # Importing chatbot after downloading nltk data to prevent error
+        from chatbot import Chatbot, Context, Message
 
         chatbot = Chatbot.from_file()
         sp.write("- Brain loaded")

@@ -3,11 +3,11 @@ import pickle
 import random
 import string
 import uuid
+from collections import defaultdict
 
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
+from nltk import pos_tag, word_tokenize
+from nltk.corpus import stopwords, wordnet
+from nltk.stem.wordnet import WordNetLemmatizer
 
 import config
 
@@ -18,15 +18,8 @@ STOP_WORDS = set(stopwords.words("english"))
 EXTENSION = "thomas"
 
 
-def download_nltk_data():
-    downloads = ("stopwords", "punkt")
-
-    for d in downloads:
-        nltk.download(d, quiet=True)
-
-
 def _load_storage_file(name: str):
-    directory = f"../{config.storage_dir}/{name}.{EXTENSION}"
+    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
 
     if not os.path.exists(directory):
         return None
@@ -36,7 +29,7 @@ def _load_storage_file(name: str):
 
 
 def _save_storage_file(name: str, data: dict):
-    directory = f"../{config.storage_dir}/{name}.{EXTENSION}"
+    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
 
     with open(directory, "wb") as f:
         return pickle.dump(data, f)
@@ -167,7 +160,16 @@ class Chatbot:
         self.mesh = mesh
         self.resps = resps
 
-        self.ps = PorterStemmer()
+        self.tag_map = self.create_tag_map()
+        self.wl = WordNetLemmatizer()
+
+    def create_tag_map(self):
+        tag_map = defaultdict(lambda: wordnet.NOUN)
+        tag_map["J"] = wordnet.ADJ
+        tag_map["V"] = wordnet.VERB
+        tag_map["R"] = wordnet.ADV
+
+        return tag_map
 
     def tokenize_msg(self, msg: str) -> tuple[set]:
         msg = msg.lower()
@@ -177,20 +179,21 @@ class Chatbot:
 
         return word_tokenize(msg)
 
-    def stem_token(self, word: str) -> str:
-        return self.ps.stem(word)
+    def lemmatize_tokens(self, tokens: list):
+        for token, tag in pos_tag(tokens):
+            yield self.wl.lemmatize(token, self.tag_map[tag[0]])
 
     def separate_tokens(self, raw_tokens: list) -> str:
         stop_words = set()
         tokens = set()
 
         # Separating stop words
-        for w in raw_tokens:
+        for w in self.lemmatize_tokens(raw_tokens):
             if w in STOP_WORDS:
                 stop_words.add(w)
             else:
                 # Stemming helps with matching key words
-                tokens.add(self.stem_token(w))
+                tokens.add(w)
 
         return tokens, stop_words
 
