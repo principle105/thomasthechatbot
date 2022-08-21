@@ -5,4 +5,4 @@ storage_dir = "storage"
 learn = True
 
 # Responses
-response_threshold = 0.85
+response_threshold = 0.8

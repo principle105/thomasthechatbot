@@ -14,13 +14,14 @@ nltk = "^3.7"
 typer = "^0.6.1"
 inquirerpy = "^0.3.4"
 yaspin = "^2.2.0"
+"discord.py" = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
 black = "^22.6.0"
 
 [tool.poetry.scripts]
-ttc = "cli:app"
+ttc = "cli.main:app"
 
 [tool.isort]
 multi_line_output = 3

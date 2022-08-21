@@ -90,7 +90,3 @@ def start():
             if r is not None:
                 # Sending the response
                 Sender.thomas(f"Thomas: {' '.join(r)}")
-
-
-if __name__ == "__main__":
-    app()

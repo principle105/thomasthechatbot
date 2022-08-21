@@ -308,7 +308,7 @@ class Chatbot:
         for r in sorted_results[: len(elligible_results)]:
 
             if keyword_query:
-                # Adding weight with prevelance of shared stop words
+                # Adding weight with prevalence of shared stop words
                 stop_words = stop_words & set(r[1].stop_words)
 
             weights.append(len(r[2]) + len(stop_words))
