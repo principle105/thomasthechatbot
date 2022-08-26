@@ -32,19 +32,43 @@ Responses to the prompt where the key is the response UUID and the value is a se
 
 ## Querying Responses
 
-Prompts are split up into keywords and stop words.
+### Tokenizing Prompts
+
+Before tokenization, prompts are lowercased, contractions are expanded and punctuation is removed. Prompts are tokenized by word and split into key words and stop words.
+
+### Ignoring Responses
+
+The user's prompt and bot's previous response are ignored to prevent repetition.
 
 ### Key Words
 
-Meshes are initially by the number of shared keywords with the prompt. The results are sorted and the meshes that aren't within a percentage threshold (configurable) of the best mesh are discarded.
+Meshes are initially queried by the number of shared key words with the prompt. The results are sorted and the meshes that aren't within a percentage threshold (configurable) of the best mesh's score are discarded.
 
 ### Stop Words
 
-Eligible meshes are weighed by their prevalence of stop words with the prompt. A mesh is selected with a weighted random choice.
+Stop words are queried in the same way as key words but with a different percentage threshold.
+
+### Mesh Association
+
+Meshes are associated with each other by the percentage of shared responses (configurable). Associated meshes for each queried mesh are found and added to the list.
 
 ### Choosing a Response
 
-Responses are chosen at random from the response UUIDs in the selected mesh. If responses share the same previous message mesh UUID as the prompt, all responses that don't are removed.
+If responses are found to share the same previous message UUID as the prompt, all non-sharing responses are moved. Responses are chosen at random from the remaining responses.
+
+# Running
+
+### CLI
+
+**Python 3.9+ is required**
+
+1. Install [Poetry](https://python-poetry.org/) using `pip install poetry`
+
+2. Install the necessary dependencies using `poetry install`
+
+3. Activate the poetry virtual environment using `poetry shell`
+
+4. Type `python run ttc` to run
 
 # Formatting
 

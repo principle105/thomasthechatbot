@@ -37,6 +37,7 @@ def download_nltk_data():
     )
 
     for d in downloads:
+        # quiet=True prevents the download progress from being displayed
         nltk.download(d, quiet=True)
 
 

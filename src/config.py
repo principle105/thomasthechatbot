@@ -5,4 +5,6 @@ storage_dir = "storage"
 learn = True
 
 # Responses
-response_threshold = 0.8
+keyword_threshold = 0.8
+stopword_threshold = 0.5
+mesh_response_association = 0.5

@@ -4,7 +4,9 @@ import random
 import string
 import uuid
 from collections import defaultdict
+from typing import Callable
 
+import contractions
 from nltk import pos_tag, word_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -39,6 +41,11 @@ def _generate_uuid():
     return str(uuid.uuid1())
 
 
+def _dict_values_to_set(d: list[dict]) -> set:
+    """Converts the values of a list of dictionaries to a set."""
+    return set().union(*d.values())
+
+
 class Storage:
     directory: str = ...
 
@@ -64,7 +71,7 @@ class Link:
         self.keywords = keywords
         self.stop_words = stop_words
 
-        # Responses
+        # Responses {response_uuid: {previous_uuid}}
         self.resps = resps
 
 
@@ -75,8 +82,11 @@ class Mesh(Storage):
         super().__init__(data)
 
     def _find_mesh(
-        self, words: set[str], attr: str, ignore: set = set()
+        self, words: set[str], attr: str, ignore: set = None
     ) -> tuple[str, set]:
+
+        if ignore is None:
+            ignore = set()
 
         for _id, data in self.data.items():
 
@@ -95,8 +105,10 @@ class Mesh(Storage):
 
             yield _id, data, shared, resps_left
 
+    def find_mesh_from_resps(self, resps: set[str], ignore=None):
+        return self._find_mesh(resps, attr="resps", ignore=ignore)
+
     def find_mesh_from_keywords(self, keywords: set[str], ignore=None):
-        # TODO: take into account synonyms
         return self._find_mesh(keywords, attr="keywords", ignore=ignore)
 
     def find_mesh_from_stop_words(self, stop_words: set[str], ignore=None):
@@ -160,6 +172,7 @@ class Chatbot:
         self.mesh = mesh
         self.resps = resps
 
+        # Responsible for lemmatizing words
         self.tag_map = self.create_tag_map()
         self.wl = WordNetLemmatizer()
 
@@ -172,12 +185,15 @@ class Chatbot:
         return tag_map
 
     def tokenize_msg(self, msg: str) -> tuple[set]:
-        msg = msg.lower()
+        text = msg.lower()
+
+        # Removing contrations
+        text = contractions.fix(text)
 
         # Removing punctuation
-        msg = msg.translate(str.maketrans("", "", string.punctuation))
+        text = text.translate(str.maketrans("", "", string.punctuation))
 
-        return word_tokenize(msg)
+        return word_tokenize(text)
 
     def lemmatize_tokens(self, tokens: list):
         for token, tag in pos_tag(tokens):
@@ -226,6 +242,23 @@ class Chatbot:
         keywords, stop_words = self.separate_tokens(raw_tokens)
 
         return raw_tokens, keywords, stop_words
+
+    def find_elligible_meshes(
+        self, meshes: list[Mesh], check: Callable, threshold: float
+    ):
+        # Sorting the results by the check function
+        sorted_results = sorted(meshes, key=check, reverse=True)
+
+        best_score = len(sorted_results[0][2])
+        min_score = best_score * threshold
+
+        # Picking the top responses that are within a percentage threshold of the best one
+        return [r for r in sorted_results if len(r[2]) >= min_score]
+
+    def find_resps_from_last_msg(
+        self, resps_left: set, resps: dict, last_msg: str
+    ) -> set:
+        return {_id for _id in resps_left if last_msg in resps[_id]}
 
     def respond(self, ctx: Context, msg: Message) -> tuple[str, list]:
         raw_tokens, keywords, stop_words = self.tokenize(msg.text)
@@ -280,59 +313,89 @@ class Chatbot:
 
             # Picking a random response if there are still no results
             if results == []:
-                resps = self.get_unlinked_resps(ignore=ignore)
+                prev_meshes = self.get_unlinked_resps(ignore=ignore)
 
-                if not resps:
+                if not prev_meshes:
                     # Getting all the responses if there are no unlinked responses
 
                     resp_ignore = ignore if len(ignore) < len(self.resps.data) else None
 
-                    resps = self.get_all_resps(ignore=resp_ignore)
+                    prev_meshes = self.get_all_resps(ignore=resp_ignore)
 
                 # Picking a random response
-                resp_id = random.choice(tuple(resps.keys()))
+                resp_id = random.choice(tuple(prev_meshes.keys()))
 
-                return None, resp_id, resps[resp_id]
+                return None, resp_id, prev_meshes[resp_id]
 
-        # Weighing and sorting the results
-        sorted_results = sorted(results, key=lambda x: len(x[2]), reverse=True)
+        # Finding elligible meshes from keywords
+        results = self.find_elligible_meshes(
+            results, lambda r: len(r[2]), config.keyword_threshold
+        )
 
-        # Picking the top responses that are within a percentage threshold of the best one
-        best_score = len(sorted_results[0][2])
-        min_score = best_score * config.response_threshold
+        # Finding elligible meshes from stop words
+        if keyword_query:
+            results = self.find_elligible_meshes(
+                results,
+                lambda r: len(stop_words & set(r[1].stop_words)),
+                config.stopword_threshold,
+            )
 
-        elligible_results = [r for r in sorted_results if len(r[2]) >= min_score]
+        # Mesh responses from previous message
+        prev_meshes = {}
 
-        weights = []
+        # All mesh responses
+        all_meshes = {}
 
-        for r in sorted_results[: len(elligible_results)]:
+        # Trying to find a response by the user's previous message
+        for mesh_id, link, _, resps_left in results:
+            r = set()
 
-            if keyword_query:
-                # Adding weight with prevalence of shared stop words
-                stop_words = stop_words & set(r[1].stop_words)
+            if ctx.last_msg is not None:
+                # Finding the response ids that have the same previous message id
+                r = self.find_resps_from_last_msg(resps_left, link.resps, ctx.last_msg)
 
-            weights.append(len(r[2]) + len(stop_words))
+                if r:
+                    prev_meshes[mesh_id] = prev_meshes.get(mesh_id, set()) + {
+                        r,
+                    }
 
-        # Weighted random choice to pick the response
-        (link,) = random.choices(elligible_results, weights=weights, k=1)
+            all_meshes[mesh_id] = all_meshes.get(mesh_id, set()) | resps_left
 
-        mesh_id, link, _, resps_left = link
+        meshes = prev_meshes if prev_meshes else all_meshes
 
-        resps = set()
+        # Finding other meshes that share a percentage of similar responses
+        initial_resps = _dict_values_to_set(meshes)
+        total_resps = len(initial_resps)
 
-        # Trying to find a response based on what the user previously said
-        if ctx.last_msg is not None:
-            # Finding the response ids that have the same previous message id
-            common_resps = {
-                _id for _id in resps_left if ctx.last_msg in link.resps[_id]
-            }
+        for mesh_id, link, shared, resps_left in self.mesh.find_mesh_from_resps(
+            initial_resps, ignore=ignore
+        ):
+            resps = meshes.get(mesh_id, set())
 
-            resps.update(common_resps)
+            share_threshold = len(shared) * config.mesh_response_association
 
-        resps = tuple(resps if resps else link.resps)
+            if total_resps < share_threshold:
+                continue
 
-        # Choosing a random response from the link
-        resp_id = random.choice(resps)
+            if ctx.last_msg is not None:
+                r = self.find_resps_from_last_msg(resps_left, link.resps, ctx.last_msg)
+
+                if r:
+                    resps.add(r)
+
+            if not prev_meshes:
+                resps |= set(resps_left)
+
+            meshes[mesh_id] = resps
+
+        # Converting to list of responses to allow for random selection
+        resps = _dict_values_to_set(meshes)
+
+        # Choosing a random mesh from the elligible mesh responses
+        resp_id = random.choice(tuple(resps))
+
+        # Getting the mesh id
+        mesh_id = next((_id for _id, r in meshes.items() if resp_id in r), None)
 
         resp = self.resps.get_resp_from_id(resp_id)
 

@@ -30,6 +30,14 @@ python-versions = ">=3.6"
 frozenlist = ">=1.1.0"
 
 [[package]]
+name = "anyascii"
+version = "0.3.1"
+description = "Unicode to ASCII transliteration"
+category = "main"
+optional = false
+python-versions = ">=3.3"
+
+[[package]]
 name = "async-timeout"
 version = "4.0.2"
 description = "Timeout context manager for asyncio programs"
@@ -102,6 +110,17 @@ description = "Cross-platform colored terminal text."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "contractions"
+version = "0.1.72"
+description = "Fixes contractions such as `you're` to you `are`"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+textsearch = ">=0.0.21"
 
 [[package]]
 name = "discord.py"
@@ -254,6 +273,14 @@ python-versions = ">=3.6.2"
 wcwidth = "*"
 
 [[package]]
+name = "pyahocorasick"
+version = "1.4.4"
+description = "pyahocorasick is a fast and memory efficient library for exact or approximate multi-pattern string search.  With the \"ahocorasick.Automaton\" class, you can find multiple key string occurrences at once in some input text.  You can use it as a plain dict-like Trie or convert a Trie to an automaton for efficient Aho-Corasick search. And pickle to disk for easy reuse of large automatons. Implemented in C and tested on Python 3.6+. Works on Linux, macOS and Windows. BSD-3-Cause license."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "regex"
 version = "2022.8.17"
 description = "Alternative regular expression module, to replace re."
@@ -268,6 +295,18 @@ description = "ANSI Color formatting for output in terminal, successor to termco
 category = "main"
 optional = false
 python-versions = ">=2.6"
+
+[[package]]
+name = "textsearch"
+version = "0.0.21"
+description = "Find strings/words in text; convenience and C speed"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+anyascii = "*"
+pyahocorasick = "*"
 
 [[package]]
 name = "tomli"
@@ -353,7 +392,7 @@ termcolor-whl = "1.1.2"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5712114ee3651ff62c6d2c5241096625e85004e06ad464d6effa455d019c11f5"
+content-hash = "3f1b92c8d11ca82268816c668ec0caa87229fd5bbe6e7226af8c50793d6c3e85"
 
 [metadata.files]
 aiohttp = [
@@ -434,6 +473,7 @@ aiosignal = [
     {file = "aiosignal-1.2.0-py3-none-any.whl", hash = "sha256:26e62109036cd181df6e6ad646f91f0dcfd05fe16d0cb924138ff2ab75d64e3a"},
     {file = "aiosignal-1.2.0.tar.gz", hash = "sha256:78ed67db6c7b7ced4f98e495e572106d5c432a93e1ddd1bf475e1dc05f5b7df2"},
 ]
+anyascii = []
 async-timeout = [
     {file = "async-timeout-4.0.2.tar.gz", hash = "sha256:2163e1640ddb52b7a8c80d0a67a08587e5d245cc9c553a74a847056bc2976b15"},
     {file = "async_timeout-4.0.2-py3-none-any.whl", hash = "sha256:8ca1e4fcf50d07413d66d1a5e416e42cfdf5851c981d679a09851a6853383b3c"},
@@ -446,6 +486,7 @@ click = [
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
 ]
 colorama = []
+contractions = []
 "discord.py" = []
 frozenlist = []
 idna = [
@@ -537,8 +578,10 @@ platformdirs = [
     {file = "platformdirs-2.5.2.tar.gz", hash = "sha256:58c8abb07dcb441e6ee4b11d8df0ac856038f944ab98b7be6b27b2a3c7feef19"},
 ]
 prompt-toolkit = []
+pyahocorasick = []
 regex = []
 termcolor-whl = []
+textsearch = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
