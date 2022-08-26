@@ -81,9 +81,7 @@ class Mesh(Storage):
     def __init__(self, data: dict[str, Link]):
         super().__init__(data)
 
-    def _find_mesh(
-        self, words: set[str], attr: str, ignore: set = None
-    ) -> tuple[str, set]:
+    def _find_mesh(self, words: set[str], attr: str, ignore: set = None):
 
         if ignore is None:
             ignore = set()
@@ -355,9 +353,7 @@ class Chatbot:
                 r = self.find_resps_from_last_msg(resps_left, link.resps, ctx.last_msg)
 
                 if r:
-                    prev_meshes[mesh_id] = prev_meshes.get(mesh_id, set()) + {
-                        r,
-                    }
+                    prev_meshes[mesh_id] = prev_meshes.get(mesh_id, set()) | r
 
             all_meshes[mesh_id] = all_meshes.get(mesh_id, set()) | resps_left
 
@@ -381,7 +377,7 @@ class Chatbot:
                 r = self.find_resps_from_last_msg(resps_left, link.resps, ctx.last_msg)
 
                 if r:
-                    resps.add(r)
+                    resps |= r
 
             if not prev_meshes:
                 resps |= set(resps_left)
