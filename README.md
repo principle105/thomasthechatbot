@@ -42,11 +42,13 @@ The user's prompt and chatbot's previous response are ignored to prevent the cha
 
 ### Key Words
 
-Meshes are initially queried by the number of shared key words with the prompt. The results are sorted and the meshes that aren't within a percentage threshold (configurable) of the best mesh's score are discarded. Considering multiple meshes increases the variety of responses.
+Meshes are initially queried by their similarity with the prompt which can be calculated by `k / (t - k + 1)`, where `k` is the number of shared key words and `t` is the total number of words.
+
+The results are sorted and the meshes that aren't within a percentage threshold (configurable) of the best mesh's score are discarded. Considering multiple meshes increases the variety of responses.
 
 ### Stop Words
 
-Stop words are queried in the same way as key words but with a different percentage threshold.
+Stop words are queried by the number of shared stop words and discarded in the same way as key words.
 
 ### Mesh Association
 

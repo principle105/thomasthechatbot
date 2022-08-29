@@ -88,10 +88,10 @@ class Mesh(Storage):
 
         for _id, data in self.data.items():
 
-            k = getattr(data, attr)
+            k = set(getattr(data, attr))
 
             # Getting shared words
-            shared = set(k) & words
+            shared = k & words
 
             if not shared:
                 continue
@@ -101,7 +101,7 @@ class Mesh(Storage):
             if not resps_left:
                 continue
 
-            yield _id, data, shared, resps_left
+            yield _id, data, len(k), shared, resps_left
 
     def find_mesh_from_resps(self, resps: set[str], ignore=None):
         return self._find_mesh(resps, attr="resps", ignore=ignore)
@@ -247,11 +247,11 @@ class Chatbot:
         # Sorting the results by the check function
         sorted_results = sorted(meshes, key=check, reverse=True)
 
-        best_score = len(sorted_results[0][2])
+        best_score = len(sorted_results[0][3])
         min_score = best_score * threshold
 
         # Picking the top responses that are within a percentage threshold of the best one
-        return [r for r in sorted_results if len(r[2]) >= min_score]
+        return [r for r in sorted_results if len(r[3]) >= min_score]
 
     def find_resps_from_last_msg(
         self, resps_left: set, resps: dict, last_msg: str
@@ -327,7 +327,9 @@ class Chatbot:
 
         # Finding elligible meshes from keywords
         results = self.find_elligible_meshes(
-            results, lambda r: len(r[2]), config.keyword_threshold
+            results,
+            lambda r: len(r[3]) / (r[2] - len(r[3]) + 1),
+            config.keyword_threshold,
         )
 
         # Finding elligible meshes from stop words
@@ -345,7 +347,7 @@ class Chatbot:
         all_meshes = {}
 
         # Trying to find a response by the user's previous message
-        for mesh_id, link, _, resps_left in results:
+        for mesh_id, link, _, _, resps_left in results:
             r = set()
 
             if ctx.last_msg is not None:
@@ -363,7 +365,7 @@ class Chatbot:
         initial_resps = _dict_values_to_set(meshes)
         total_resps = len(initial_resps)
 
-        for mesh_id, link, shared, resps_left in self.mesh.find_mesh_from_resps(
+        for mesh_id, link, _, shared, resps_left in self.mesh.find_mesh_from_resps(
             initial_resps, ignore=ignore
         ):
             resps = meshes.get(mesh_id, set())
