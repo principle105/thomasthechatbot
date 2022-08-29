@@ -363,16 +363,16 @@ class Chatbot:
 
         # Finding other meshes that share a percentage of similar responses
         initial_resps = _dict_values_to_set(meshes)
-        total_resps = len(initial_resps)
+        share_threshold = len(initial_resps) * config.mesh_association
 
         for mesh_id, link, _, shared, resps_left in self.mesh.find_mesh_from_resps(
             initial_resps, ignore=ignore
         ):
             resps = meshes.get(mesh_id, set())
 
-            share_threshold = len(shared) * config.mesh_association
+            share_threshold = len(shared)
 
-            if total_resps < share_threshold:
+            if len(shared) < share_threshold:
                 continue
 
             if ctx.last_msg is not None:
