@@ -3,6 +3,8 @@
     <h1>Thomas the Chatbot</h1>
 </div>
 
+![Demo](https://i.imgur.com/Jet4UGh.gif)
+
 # How does Thomas work?
 
 Thomas has no hard-coded responses and is designed to “learn” as he is spoken to.
