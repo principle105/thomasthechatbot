@@ -13,7 +13,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 
 import config
 
-from .context import Context, Message
+from .context import Context
 
 # Constants
 STOP_WORDS = set(stopwords.words("english"))
@@ -258,8 +258,8 @@ class Chatbot:
     ) -> set:
         return {_id for _id in resps_left if last_msg in resps[_id]}
 
-    def respond(self, ctx: Context, msg: Message) -> tuple[str, list]:
-        raw_tokens, keywords, stop_words = self.tokenize(msg.text)
+    def respond(self, ctx: Context, msg: str) -> tuple[str, list]:
+        raw_tokens, keywords, stop_words = self.tokenize(msg)
 
         msg_id = self.resps.get_resp_from_tokens(raw_tokens)
 
@@ -368,7 +368,7 @@ class Chatbot:
         ):
             resps = meshes.get(mesh_id, set())
 
-            share_threshold = len(shared) * config.mesh_response_association
+            share_threshold = len(shared) * config.mesh_association
 
             if total_resps < share_threshold:
                 continue
