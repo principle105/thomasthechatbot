@@ -24,7 +24,7 @@ SOFTWARE."""
 import discord
 
 import config
-from chatbot.utils import download_nltk_data
+from utils import download_nltk_data
 
 
 def main():

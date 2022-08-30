@@ -21,15 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
-
 import typer
 from InquirerPy import inquirer
 from InquirerPy.utils import color_print
 from InquirerPy.validator import EmptyInputValidator
 from yaspin import yaspin
 
-from chatbot import Context
-from chatbot.utils import download_nltk_data
+from utils import download_nltk_data
 
 # Initializing the CLI
 app = typer.Typer()
@@ -61,7 +59,7 @@ def start():
         sp.write("- Downloaded data")
 
         # Importing chatbot after downloading nltk data to prevent error
-        from chatbot import Chatbot
+        from chatbot import Chatbot, Context
 
         chatbot = Chatbot.from_file()
         sp.write("- Brain loaded")
