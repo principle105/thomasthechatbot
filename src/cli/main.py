@@ -28,7 +28,8 @@ from InquirerPy.utils import color_print
 from InquirerPy.validator import EmptyInputValidator
 from yaspin import yaspin
 
-from chatbot import Context, download_nltk_data
+from chatbot import Context
+from chatbot.utils import download_nltk_data
 
 # Initializing the CLI
 app = typer.Typer()
