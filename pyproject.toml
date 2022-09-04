@@ -17,6 +17,7 @@ yaspin = "^2.2.0"
 "discord.py" = "^2.0.0"
 contractions = "^0.1.72"
 python-decouple = "^3.6"
+poetry = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
