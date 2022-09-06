@@ -5,6 +5,7 @@ storage_dir = config("STORAGE_DIR", default="storage")
 
 # Discord Bot
 token = config("TOKEN", default=None)
+guild_id = config("GUILD_ID", cast=int, default=0)
 channel_id = config("CHANNEL_ID", cast=int, default=0)
 
 # General

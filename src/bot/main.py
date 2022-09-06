@@ -39,4 +39,8 @@ def main():
     intents.messages = True
 
     thomas = ThomasClient(intents=intents)
+
+    if config.token is None:
+        raise Exception("No token provided")
+
     thomas.run(config.token)

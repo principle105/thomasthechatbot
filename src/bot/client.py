@@ -45,11 +45,12 @@ class ThomasClient(discord.Client):
         if msg.author.id == self.user.id:
             return
 
-        # Checking if the channel_id is not configured
-        if config.channel_id is None:
+        # Checking if the configured guild id matches
+        if config.guild_id and msg.guild.id != config.guild_id:
             return
 
-        if msg.channel.id != config.channel_id:
+        # Checking if the configured channel id matches
+        if config.channel_id and msg.channel.id != config.channel_id:
             return
 
         # Getting the user's context

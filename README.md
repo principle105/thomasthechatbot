@@ -80,21 +80,33 @@ If responses are found to share the same previous message UUID as the prompt, al
 
 # Running
 
-### CLI
-
 **Python 3.9+ is required**
+
+### CLI
 
 1. Install [Poetry](https://python-poetry.org/) with `pip install poetry`
 
-2. Install the necessary dependencies with `poetry install`
+2. Install the necessary dependencies with `poetry install -E cli`
 
 3. Activate the poetry virtual environment with `poetry shell`
 
 4. Type `python run ttc` to run
 
+### Discord Bot
+
+1. Install [Poetry](https://python-poetry.org/) with `pip install poetry`
+
+2. Install the necessary dependencies with `poetry install -E bot`
+
+3. Activate the poetry virtual environment with `poetry shell`
+
+4. Type `python run ttcbot` to run
+
 # Configuration
 
-Create a `.env` file in the root directory of the repository and fill it with the necessary information. All configurable variables can be found in `.env.example`.
+Create a `.env` file in the root directory of the repository and fill it with the necessary information.
+
+All configurable variables can be found in `.env.example`.
 
 # Contributing
 
