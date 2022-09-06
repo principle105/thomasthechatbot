@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "A Python chatbot that learns as you speak to it."
 authors = ["principle105 <principle105@gmail.com>"]
 license = "MIT"
+repository = "https://github.com/principle105/thomasthechatbot"
+readme = "README.md"
+keywords = ["chatbot"]
 packages = [
     { include = "*", from =  "src" },
 ]
