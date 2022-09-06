@@ -178,7 +178,7 @@ class Resps(Storage):
 
 
 class Chatbot:
-    def __init__(self, mesh: Mesh, resps: Resps):
+    def __init__(self, mesh: Mesh, resps: Resps, new_data: bool):
         # The states conrolling thomas' memory
         self.mesh = mesh
         self.resps = resps
@@ -186,6 +186,9 @@ class Chatbot:
         # Responsible for lemmatizing words
         self.tag_map = self.create_tag_map()
         self.wl = WordNetLemmatizer()
+
+        # Whether there is any data saved
+        self.new_data = new_data
 
     def create_tag_map(self):
         tag_map = defaultdict(lambda: wordnet.NOUN)
@@ -416,4 +419,6 @@ class Chatbot:
         mesh = Mesh.from_file()
         resps = Resps.from_file()
 
-        return cls(mesh=mesh, resps=resps)
+        new_data = not (mesh.data or resps.data)
+
+        return cls(mesh=mesh, resps=resps, new_data=new_data)

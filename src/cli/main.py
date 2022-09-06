@@ -52,6 +52,11 @@ class Sender:
 
 
 @app.command()
+def info():
+    ...
+
+
+@app.command()
 def start():
     with yaspin(text="Loading", color="cyan") as sp:
         # quiet=True prevents the download progress from being displayed
@@ -65,6 +70,11 @@ def start():
         sp.write("- Brain loaded")
 
         sp.ok("✔")
+
+    if chatbot.new_data:
+        Sender.success(
+            "Thomas learns as you speak to him.\n" "Save his brain by typing 's'."
+        )
 
     # Creating the user's context
     ctx = Context()
