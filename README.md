@@ -21,13 +21,13 @@ Previous responses are stored in `storage/resps.thomas` as a dictionary where th
 
 ### Mesh
 
-Prompts are associated with responses through a "mesh" which is stored in `storage/mesh.thomas`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links are used to associate responses to patterns of words, they have the following structure:
+Prompts are associated with responses through a "mesh" which is stored in `storage/mesh.thomas`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links associate responses to patterns of words, they have the following attributes:
 
 `stop_words: set`
-Stop words separated from the tokenized prompt
+Stop words separated from the tokenized prompt.
 
 `keywords: set`
-The remaining words which are lemmatized by their part of speech
+The remaining words which are lemmatized by their part of speech.
 
 `resps: dict[str, set]`
 Responses to the prompt where the key is the response UUID and the value is a set of mesh ids from the previous prompt.
@@ -36,25 +36,43 @@ Responses to the prompt where the key is the response UUID and the value is a se
 
 ### Tokenizing Prompts
 
-Before tokenization, prompts are lowercased, contractions are expanded and punctuation is removed. This aids in improving the consistency and accuracy of queries. Prompts are then tokenized by word and split into key words and stop words.
+Before tokenization, prompts are lowercased, contractions are expanded and punctuation is removed. This aids in improving the consistency and accuracy of queries. Prompts are tokenized by word and split into key words and stop words.
 
 ### Ignoring Responses
 
-The user's prompt and chatbot's previous response are ignored to prevent the chatbot from seeming repetitive.
+The user's prompt and chatbot's previous response are ignored to prevent the chatbot from appearing repetitive.
 
-### Key Words
+### Initial Query
 
-Meshes are initially queried by their similarity with the prompt which can be calculated by `k / (t - k + 1)`, where `k` is the number of shared key words and `t` is the total number of words.
+Meshes are initially queried by their score which can be calculated with:
 
-The results are sorted and the meshes that aren't within a percentage threshold (configurable) of the best mesh's score are discarded. Considering multiple meshes increases the variety of responses.
+`(ss / 2 + sk) / (ts / 2 + tk - ss / 2 - sk + 1)`
 
-### Stop Words
+`ss` = shared stop words
 
-Stop words are queried by the number of shared stop words and discarded in the same way as key words.
+`sk` = shared key words
+
+`ts` = total stop words
+
+`tk` = total key words
+
+This formula weighs shared key words 2 times more heavily than stop words by dividing `ss` and `sk` by 2. It also takes into account the total number of words resulting in more precise meshes being favoured.
+
+### First Discard
+
+Meshes with scores below a threshold (`MIN_SCORE`) are discarded.
+
+### No Results Queried
+
+If no results remain, meshes are queried by the number of shared stop words.
+
+### Second Discard
+
+The remaining meshes are sorted and meshes that fall below a percentage threshold (`SCORE_THRESHOLD`) of the best score are discarded. Considering multiple meshes increases the variety of responses.
 
 ### Mesh Association
 
-Meshes are associated with each other by the percentage of shared responses (configurable). Associated meshes for each queried mesh are found and added to the list. This process prevents less trained prompts from having a small response pool.
+Meshes are associated with each other by the percentage of shared responses (`MESH_ASSOCIATION`). Associated meshes for each queried mesh are found and added to the list. This process prevents less trained prompts from having a small response pool.
 
 ### Choosing a Response
 

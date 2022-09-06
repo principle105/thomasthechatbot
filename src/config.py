@@ -11,6 +11,6 @@ channel_id = config("CHANNEL_ID", cast=int, default=0)
 learn = config("LEARN", cast=bool, default=True)
 
 # Responses
-keyword_threshold = config("KEYWORD_THRESHOLD", cast=float, default=0.8)
-stopword_threshold = config("STOPWORD_THRESHOLD", cast=float, default=0.5)
-mesh_association = config("MESH_ASSOCIATION", cast=float, default=0.5)
+min_score = config("MIN_SCORE", cast=float, default=0.7)
+score_threshold = config("SCORE_THRESHOLD", cast=float, default=0.7)
+mesh_association = config("MESH_ASSOCIATION", cast=float, default=0.6)

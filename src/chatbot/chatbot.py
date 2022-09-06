@@ -104,19 +104,18 @@ class Mesh(Storage):
     def __init__(self, data: dict[str, Link]):
         super().__init__(data)
 
-    def _find_mesh(self, words: set[str], attr: str, ignore: set = None):
+    def find_mesh(
+        self, score_callback: Callable[[Link], int], min_score: int, ignore: set = None
+    ):
 
         if ignore is None:
             ignore = set()
 
         for _id, data in self.data.items():
 
-            k = set(getattr(data, attr))
+            score = score_callback(data)
 
-            # Getting shared words
-            shared = k & words
-
-            if not shared:
+            if score < min_score:
                 continue
 
             resps_left = set(data.resps) - ignore
@@ -124,16 +123,7 @@ class Mesh(Storage):
             if not resps_left:
                 continue
 
-            yield _id, data, len(k), shared, resps_left
-
-    def find_mesh_from_resps(self, resps: set[str], ignore=None):
-        return self._find_mesh(resps, attr="resps", ignore=ignore)
-
-    def find_mesh_from_keywords(self, keywords: set[str], ignore=None):
-        return self._find_mesh(keywords, attr="keywords", ignore=ignore)
-
-    def find_mesh_from_stop_words(self, stop_words: set[str], ignore=None):
-        return self._find_mesh(stop_words, attr="stop_words", ignore=ignore)
+            yield _id, data, resps_left, score
 
     def add_new_mesh(self, _id: str, keywords: set, stop_words: set):
         if _id is None:
@@ -220,7 +210,7 @@ class Chatbot:
         for token, tag in pos_tag(tokens):
             yield self.wl.lemmatize(token, self.tag_map[tag[0]])
 
-    def separate_tokens(self, raw_tokens: list) -> str:
+    def separate_tokens(self, raw_tokens: list):
         stop_words = set()
         tokens = set()
 
@@ -264,17 +254,15 @@ class Chatbot:
 
         return raw_tokens, keywords, stop_words
 
-    def find_elligible_meshes(
-        self, meshes: list[Mesh], check: Callable, threshold: float
-    ):
+    def find_elligible_meshes(self, meshes: list, threshold: float):
         # Sorting the results by the check function
-        sorted_results = sorted(meshes, key=check, reverse=True)
+        sorted_results = sorted(meshes, key=lambda x: x[3], reverse=True)
 
-        best_score = len(sorted_results[0][3])
+        best_score = sorted_results[0][3]
         min_score = best_score * threshold
 
         # Picking the top responses that are within a percentage threshold of the best one
-        return [r for r in sorted_results if len(r[3]) >= min_score]
+        return [r for r in sorted_results if r[3] >= min_score]
 
     def find_resps_from_last_msg(
         self, resps_left: set, resps: dict, last_msg: str
@@ -319,17 +307,24 @@ class Chatbot:
         if msg_id is not None:
             ignore.add(msg_id)
 
+        def _filter(r: Link):
+            t = len(stop_words & r.stop_words) / 2 + len(r.keywords & keywords)
+
+            return t / (len(r.stop_words) / 2 + len(r.keywords) - t + 1)
+
         results = [
-            k for k in self.mesh.find_mesh_from_keywords(keywords, ignore=ignore)
+            k
+            for k in self.mesh.find_mesh(
+                _filter, min_score=config.min_score, ignore=ignore
+            )
         ]
 
-        keyword_query = bool(results)
+        if results == []:
+            # Trying the query just using stop words
+            _filter = lambda r: len(stop_words & r.stop_words)
 
-        if keyword_query is False:
-            # Trying the query using stop words
             results = [
-                w
-                for w in self.mesh.find_mesh_from_stop_words(stop_words, ignore=ignore)
+                k for k in self.mesh.find_mesh(_filter, min_score=1, ignore=ignore)
             ]
 
             # Picking a random response if there are still no results
@@ -349,19 +344,7 @@ class Chatbot:
                 return None, resp_id, prev_meshes[resp_id]
 
         # Finding elligible meshes from keywords
-        results = self.find_elligible_meshes(
-            results,
-            lambda r: len(r[3]) / (r[2] - len(r[3]) + 1),
-            config.keyword_threshold,
-        )
-
-        # Finding elligible meshes from stop words
-        if keyword_query:
-            results = self.find_elligible_meshes(
-                results,
-                lambda r: len(stop_words & set(r[1].stop_words)),
-                config.stopword_threshold,
-            )
+        results = self.find_elligible_meshes(results, config.score_threshold)
 
         # Mesh responses from previous message
         prev_meshes = {}
@@ -370,7 +353,7 @@ class Chatbot:
         all_meshes = {}
 
         # Trying to find a response by the user's previous message
-        for mesh_id, link, _, _, resps_left in results:
+        for mesh_id, link, resps_left, _ in results:
             r = set()
 
             if ctx.last_msg is not None:
@@ -384,19 +367,16 @@ class Chatbot:
 
         meshes = prev_meshes if prev_meshes else all_meshes
 
-        # Finding other meshes that share a percentage of similar responses
         initial_resps = _dict_values_to_set(meshes)
         share_threshold = len(initial_resps) * config.mesh_association
 
-        for mesh_id, link, _, shared, resps_left in self.mesh.find_mesh_from_resps(
-            initial_resps, ignore=ignore
+        _filter = lambda x: len(set(x.resps) & initial_resps)
+
+        # Finding other meshes that share a percentage of similar responses
+        for mesh_id, link, resps_left, _ in self.mesh.find_mesh(
+            _filter, min_score=share_threshold, ignore=ignore
         ):
             resps = meshes.get(mesh_id, set())
-
-            share_threshold = len(shared)
-
-            if len(shared) < share_threshold:
-                continue
 
             if ctx.last_msg is not None:
                 r = self.find_resps_from_last_msg(resps_left, link.resps, ctx.last_msg)
