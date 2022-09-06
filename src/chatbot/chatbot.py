@@ -338,8 +338,13 @@ class Chatbot:
 
                     prev_meshes = self.get_all_resps(ignore=resp_ignore)
 
+                resp_ids = tuple(prev_meshes.keys())
+
+                if not resp_ids:
+                    raise Exception("No responses found, configure learning to True")
+
                 # Picking a random response
-                resp_id = random.choice(tuple(prev_meshes.keys()))
+                resp_id = random.choice(resp_ids)
 
                 return None, resp_id, prev_meshes[resp_id]
 
