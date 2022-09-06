@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "thomasthechatbot"
 version = "0.1.0"
-description = "thomas the chatbot"
+description = "A Python chatbot that learns as you speak to it."
 authors = ["principle105 <principle105@gmail.com>"]
 license = "MIT"
 packages = [
