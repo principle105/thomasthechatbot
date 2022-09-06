@@ -17,5 +17,6 @@ Dockerfile
 .dockerignore
 .gitignore
 README.md
+dist
 
 .DS_Store
