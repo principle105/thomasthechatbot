@@ -23,7 +23,7 @@ pip install thomasthechatbot
 from ttc import Chatbot, Context
 from ttc.utils import download_nltk_data
 
-# Only needs to be run once
+# Only needs to be run once (can be removed after first run)
 download_nltk_data()
 
 ctx = Context()
@@ -44,7 +44,7 @@ while talk:
         # Saving the response to the context
         ctx.save_resp(resp)
 
-        print(resp)
+        print(f"Thomas: {resp}")
 
 # Saving the chatbot data
 chatbot.save_data()
