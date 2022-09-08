@@ -21,6 +21,10 @@ pip install thomasthechatbot
 
 ```py
 from ttc import Chatbot, Context
+from ttc.utils import download_nltk_data
+
+# Only needs to be run once
+download_nltk_data()
 
 ctx = Context()
 
