@@ -20,14 +20,15 @@ pip install thomasthechatbot
 ## Basic Usage
 
 ```py
-from ttc import Chatbot, Context
-from ttc.utils import download_nltk_data
+from ttc import Chatbot, Context, download_nltk_data
 
 # Only needs to be run once (can be removed after first run)
 download_nltk_data()
 
+# Creating the context
 ctx = Context()
 
+# Initializing the chatbot
 chatbot = Chatbot()
 
 talk = True

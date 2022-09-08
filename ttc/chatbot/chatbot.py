@@ -31,15 +31,12 @@ from typing import TYPE_CHECKING, Callable
 
 import contractions
 from nltk import pos_tag, word_tokenize
-from nltk.corpus import stopwords, wordnet
-from nltk.stem.wordnet import WordNetLemmatizer
 
 if TYPE_CHECKING:
     from .context import Context
 
 # Constants
 DEFAULT_STORAGE_PATH = "storage"
-STOP_WORDS = set(stopwords.words("english"))
 
 
 def _load_json_file(path: str, name: str) -> dict:
@@ -238,6 +235,9 @@ class Chatbot:
         mesh_association: float = 0.6,
     ):
 
+        from nltk.corpus import stopwords
+        from nltk.stem.wordnet import WordNetLemmatizer
+
         # The path to the storage directory
         self.path = path or DEFAULT_STORAGE_PATH
 
@@ -255,7 +255,11 @@ class Chatbot:
         self.tag_map = self.create_tag_map()
         self.wl = WordNetLemmatizer()
 
+        self.all_stop_words = set(stopwords.words("english"))
+
     def create_tag_map(self):
+        from nltk.corpus import wordnet
+
         tag_map = defaultdict(lambda: wordnet.NOUN)
         tag_map["J"] = wordnet.ADJ
         tag_map["V"] = wordnet.VERB
@@ -284,7 +288,7 @@ class Chatbot:
 
         # Separating stop words
         for w in self.lemmatize_tokens(raw_tokens):
-            if w in STOP_WORDS:
+            if w in self.all_stop_words:
                 stop_words.add(w)
             else:
                 # Stemming helps with matching key words
