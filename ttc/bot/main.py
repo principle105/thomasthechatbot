@@ -23,14 +23,14 @@ SOFTWARE."""
 
 import discord
 
-import config
-from utils import download_nltk_data
+import ttc.config as config
+from ttc.utils import download_nltk_data
 
 
 def main():
     download_nltk_data()
 
-    from .client import ThomasClient
+    from ttc import ThomasClient
 
     intents = discord.Intents.none()
 

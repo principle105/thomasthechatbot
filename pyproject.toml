@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thomasthechatbot"
-version = "0.1.1"
+version = "0.2.1"
 description = "A Python chatbot that learns as you speak to it."
 authors = ["principle105 <principle105@gmail.com>"]
 license = "MIT"
@@ -8,7 +8,7 @@ repository = "https://github.com/principle105/thomasthechatbot"
 readme = "README.md"
 keywords = ["chatbot"]
 packages = [
-    { include = "*", from =  "src" },
+    {include = "ttc"}
 ]
 
 [tool.poetry.dependencies]
@@ -32,8 +32,8 @@ isort = "^5.10.1"
 black = "^22.6.0"
 
 [tool.poetry.scripts]
-ttc = "cli.main:app"
-ttcbot = "bot.main:main"
+ttc = "ttc.cli.main:app"
+ttcbot = "ttc.bot.main:main"
 
 [tool.isort]
 multi_line_output = 3

@@ -34,7 +34,7 @@ from nltk import pos_tag, word_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
 
-import config
+import ttc.config as config
 
 from .context import Context
 

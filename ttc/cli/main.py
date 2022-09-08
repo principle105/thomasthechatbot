@@ -27,7 +27,7 @@ from InquirerPy.utils import color_print
 from InquirerPy.validator import EmptyInputValidator
 from yaspin import yaspin
 
-from utils import download_nltk_data
+from ttc.utils import download_nltk_data
 
 # Initializing the CLI
 app = typer.Typer()
@@ -52,11 +52,6 @@ class Sender:
 
 
 @app.command()
-def info():
-    ...
-
-
-@app.command()
 def start():
     with yaspin(text="Loading", color="cyan") as sp:
         # quiet=True prevents the download progress from being displayed
@@ -64,7 +59,7 @@ def start():
         sp.write("- Downloaded data")
 
         # Importing chatbot after downloading nltk data to prevent error
-        from chatbot import Chatbot, Context
+        from ttc import Chatbot, Context
 
         chatbot = Chatbot.from_file()
         sp.write("- Brain loaded")
