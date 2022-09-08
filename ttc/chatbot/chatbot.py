@@ -21,43 +21,45 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
+import json
 import os
-import pickle
 import random
 import string
 import uuid
 from collections import defaultdict
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import contractions
 from nltk import pos_tag, word_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
 
-import ttc.config as config
-
-from .context import Context
+if TYPE_CHECKING:
+    from .context import Context
 
 # Constants
+DEFAULT_STORAGE_PATH = "storage"
 STOP_WORDS = set(stopwords.words("english"))
-EXTENSION = "thomas"
 
 
-def _load_storage_file(name: str):
-    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
+def _load_json_file(path: str, name: str) -> dict:
+    directory = f"{path}/{name}.json"
 
     if not os.path.exists(directory):
-        return None
+        return {}
 
-    with open(directory, "rb") as f:
-        return pickle.load(f)
+    with open(directory, "r") as f:
+        return json.load(f)
 
 
-def _save_storage_file(name: str, data: dict):
-    directory = f"{config.storage_dir}/{name}.{EXTENSION}"
+def _save_json_file(path: str, name: str, data: dict):
+    directory = f"{path}/{name}.json"
 
-    with open(directory, "wb") as f:
-        return pickle.dump(data, f)
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(directory, "w") as f:
+        return json.dump(data, f)
 
 
 def _generate_uuid():
@@ -70,19 +72,28 @@ def _dict_values_to_set(d: list[dict]) -> set:
 
 
 class Storage:
-    directory: str = ...
+    file_name: str = ...
 
     def __init__(self, data: dict):
         self.data = data
 
-    def save_data(self):
-        _save_storage_file(self.directory, self.data)
+    def to_json(self) -> dict:
+        ...
 
     @classmethod
-    def from_file(cls):
-        data = _load_storage_file(cls.directory) or {}
+    def from_json(cls, data: dict):
+        ...
 
-        return cls(data)
+    def save_data(self, path: str):
+        json_data = self.to_json()
+
+        _save_json_file(path, self.file_name, json_data)
+
+    @classmethod
+    def from_file(cls, path: str):
+        json_data = _load_json_file(path, cls.file_name)
+
+        return cls.from_json(json_data)
 
 
 class Link:
@@ -97,12 +108,34 @@ class Link:
         # Responses {response_uuid: {previous_uuid}}
         self.resps = resps
 
+    def to_json(self) -> dict:
+        return {
+            "keywords": list(self.keywords),
+            "stop_words": list(self.stop_words),
+            "resps": {v: list(k) for v, k in self.resps.items()},
+        }
+
+    @classmethod
+    def from_json(cls, data: dict):
+        return cls(
+            keywords=set(data["keywords"]),
+            stop_words=set(data["stop_words"]),
+            resps={v: set(k) for v, k in data["resps"].items()},
+        )
+
 
 class Mesh(Storage):
-    directory = "mesh"
+    file_name = "mesh"
 
     def __init__(self, data: dict[str, Link]):
         super().__init__(data)
+
+    def to_json(self) -> dict:
+        return {k: v.to_json() for k, v in self.data.items()}
+
+    @classmethod
+    def from_json(cls, data: dict):
+        return cls({k: Link.from_json(v) for k, v in data.items()})
 
     def find_mesh(
         self, score_callback: Callable[[Link], int], min_score: int, ignore: set = None
@@ -151,10 +184,17 @@ class Mesh(Storage):
 
 
 class Resps(Storage):
-    directory = "resps"
+    file_name = "resps"
 
     def __init__(self, data: dict[str, list]):
         super().__init__(data)
+
+    def to_json(self) -> dict:
+        return self.data
+
+    @classmethod
+    def from_json(cls, data: dict):
+        return cls(data)
 
     def add_new_resp(self, msg_tokens: list) -> str:
         _id = _generate_uuid()
@@ -177,18 +217,43 @@ class Resps(Storage):
         return self.data.get(_id, None)
 
 
+class Response:
+    def __init__(self, resp: str, resp_id: str, mesh_id: str = None):
+        self.resp = resp
+        self.resp_id = resp_id
+        self.mesh_id = mesh_id
+
+    def __str__(self) -> str:
+        return self.resp
+
+
 class Chatbot:
-    def __init__(self, mesh: Mesh, resps: Resps, new_data: bool):
+    def __init__(
+        self,
+        *,
+        path: str = None,
+        learn: bool = True,
+        min_score: float = 0.7,
+        score_threshold: float = 0.7,
+        mesh_association: float = 0.6,
+    ):
+
+        # The path to the storage directory
+        self.path = path or DEFAULT_STORAGE_PATH
+
         # The states conrolling thomas' memory
-        self.mesh = mesh
-        self.resps = resps
+        self.mesh = Mesh.from_file(self.path)
+        self.resps = Resps.from_file(self.path)
+
+        # Configurations
+        self.learn = learn
+        self.min_score = min_score
+        self.score_threshold = score_threshold
+        self.mesh_association = mesh_association
 
         # Responsible for lemmatizing words
         self.tag_map = self.create_tag_map()
         self.wl = WordNetLemmatizer()
-
-        # Whether there is any data saved
-        self.new_data = new_data
 
     def create_tag_map(self):
         tag_map = defaultdict(lambda: wordnet.NOUN)
@@ -272,12 +337,12 @@ class Chatbot:
     ) -> set:
         return {_id for _id in resps_left if last_msg in resps[_id]}
 
-    def respond(self, ctx: Context, msg: str) -> tuple[str, list]:
+    def respond(self, ctx: "Context", msg: str) -> Response:
         raw_tokens, keywords, stop_words = self.tokenize(msg)
 
         msg_id = self.resps.get_resp_from_tokens(raw_tokens)
 
-        if config.learn:
+        if self.learn:
             # Saving the user's message
             if msg_id is None:
                 msg_id = self.resps.add_new_resp(msg_tokens=raw_tokens)
@@ -318,7 +383,7 @@ class Chatbot:
         results = [
             k
             for k in self.mesh.find_mesh(
-                _filter, min_score=config.min_score, ignore=ignore
+                _filter, min_score=self.min_score, ignore=ignore
             )
         ]
 
@@ -349,10 +414,12 @@ class Chatbot:
                 # Picking a random response
                 resp_id = random.choice(resp_ids)
 
-                return None, resp_id, prev_meshes[resp_id]
+                resp = " ".join(prev_meshes[resp_id])
+
+                return Response(resp=resp, resp_id=resp_id)
 
         # Finding elligible meshes from keywords
-        results = self.find_elligible_meshes(results, config.score_threshold)
+        results = self.find_elligible_meshes(results, self.score_threshold)
 
         # Mesh responses from previous message
         prev_meshes = {}
@@ -376,7 +443,7 @@ class Chatbot:
         meshes = prev_meshes if prev_meshes else all_meshes
 
         initial_resps = _dict_values_to_set(meshes)
-        share_threshold = len(initial_resps) * config.mesh_association
+        share_threshold = len(initial_resps) * self.mesh_association
 
         _filter = lambda x: len(set(x.resps) & initial_resps)
 
@@ -408,17 +475,10 @@ class Chatbot:
 
         resp = self.resps.get_resp_from_id(resp_id)
 
-        return mesh_id, resp_id, resp
+        resp = " ".join(resp)
+
+        return Response(resp=resp, resp_id=resp_id, mesh_id=mesh_id)
 
     def save_data(self):
-        self.mesh.save_data()
-        self.resps.save_data()
-
-    @classmethod
-    def from_file(cls):
-        mesh = Mesh.from_file()
-        resps = Resps.from_file()
-
-        new_data = not (mesh.data or resps.data)
-
-        return cls(mesh=mesh, resps=resps, new_data=new_data)
+        self.mesh.save_data(self.path)
+        self.resps.save_data(self.path)

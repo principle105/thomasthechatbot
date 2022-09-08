@@ -22,6 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
 import time
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .chatbot import Response
 
 
 class Context:
@@ -36,8 +40,8 @@ class Context:
 
         self.last_timestamp = last_timestamp
 
-    def save_message(self, last_resp: str = None, last_msg: str = None):
-        self.last_resp = last_resp
-        self.last_msg = last_msg
+    def save_resp(self, resp: "Response"):
+        self.last_resp = resp.resp_id
+        self.last_msg = resp.mesh_id
 
         self.last_timestamp = time.time()

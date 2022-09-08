@@ -5,6 +5,63 @@
 
 ![Demo](https://i.imgur.com/Jet4UGh.gif)
 
+# Installation
+
+**Python 3.9+ is required**
+
+This package can be installed from [PyPi](https://pypi.org/project/thomasthechatbot/) with:
+
+```
+pip install thomasthechatbot
+```
+
+# Usage
+
+## Basic Usage
+
+```py
+from ttc import Chatbot, Context
+
+ctx = Context()
+
+chatbot = Chatbot()
+
+talk = True
+
+while talk:
+    msg = input("You: ")
+
+    if msg == "s":
+        talk = False
+    else:
+        # Getting the response
+        resp = chatbot.respond(ctx, msg)
+
+        # Saving the response to the context
+        ctx.save_resp(resp)
+
+        print(resp)
+
+# Saving the chatbot data
+chatbot.save_data()
+```
+
+## Configurations
+
+```py
+chatbot = Chatbot(
+    path="brain",
+    learn=False,
+    min_score=0.5,
+    score_threshold=0.5,
+    mesh_association=0.5,
+)
+```
+
+## CLI
+
+Type `ttc` to begin talking to Thomas.
+
 # How does Thomas work?
 
 Thomas has no hard-coded responses and is designed to “learn” as he is spoken to.
@@ -17,11 +74,11 @@ Thomas does not come up with his own responses, he reiterates those that he has 
 
 ### Responses
 
-Previous responses are stored in `storage/resps.thomas` as a dictionary where the key is a generated [UUID](https://docs.python.org/3/library/uuid.html) and the value is the tokenized response.
+Previous responses are stored in `resps.json` as a dictionary where the key is a generated [UUID](https://docs.python.org/3/library/uuid.html) and the value is the tokenized response.
 
 ### Mesh
 
-Prompts are associated with responses through a "mesh" which is stored in `storage/mesh.thomas`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links associate responses to patterns of words, they have the following attributes:
+Prompts are associated with responses through a "mesh" which is stored in `mesh.thomas`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links associate responses to patterns of words, they have the following attributes:
 
 `stop_words: set`
 Stop words separated from the tokenized prompt.
@@ -60,7 +117,7 @@ This formula weighs shared key words 2 times more heavily than stop words by div
 
 ### First Discard
 
-Meshes with scores below a threshold (`MIN_SCORE`) are discarded.
+Meshes with scores below a threshold (`min_score`) are discarded.
 
 ### No Results Queried
 
@@ -68,45 +125,15 @@ If no results remain, meshes are queried by the number of shared stop words.
 
 ### Second Discard
 
-The remaining meshes are sorted and meshes that fall below a percentage threshold (`SCORE_THRESHOLD`) of the best score are discarded. Considering multiple meshes increases the variety of responses.
+The remaining meshes are sorted and meshes that fall below a percentage threshold (`score_threshold`) of the best score are discarded. Considering multiple meshes increases the variety of responses.
 
 ### Mesh Association
 
-Meshes are associated with each other by the percentage of shared responses (`MESH_ASSOCIATION`). Associated meshes for each queried mesh are found and added to the list. This process prevents less trained prompts from having a small response pool.
+Meshes are associated with each other by the percentage of shared responses (`mesh_association`). Associated meshes for each queried mesh are found and added to the list. This process prevents less trained prompts from having a small response pool.
 
 ### Choosing a Response
 
 If responses are found to share the same previous message UUID as the prompt, all non-sharing responses are moved. Responses are chosen at random from the remaining responses. Random selection prevents the chatbot from being predictable.
-
-# Running
-
-**Python 3.9+ is required**
-
-### CLI
-
-1. Install [Poetry](https://python-poetry.org/) with `pip install poetry`
-
-2. Install the necessary dependencies with `poetry install -E cli`
-
-3. Activate the poetry virtual environment with `poetry shell`
-
-4. Type `python run ttc` to run
-
-### Discord Bot
-
-1. Install [Poetry](https://python-poetry.org/) with `pip install poetry`
-
-2. Install the necessary dependencies with `poetry install -E bot`
-
-3. Activate the poetry virtual environment with `poetry shell`
-
-4. Type `python run ttcbot` to run
-
-# Configuration
-
-Create a `.env` file in the root directory of the repository and fill it with the necessary information.
-
-All configurable variables can be found in `.env.example`.
 
 # Contributing
 

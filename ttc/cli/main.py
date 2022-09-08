@@ -54,22 +54,20 @@ class Sender:
 @app.command()
 def start():
     with yaspin(text="Loading", color="cyan") as sp:
-        # quiet=True prevents the download progress from being displayed
         download_nltk_data(quiet=True)
         sp.write("- Downloaded data")
 
         # Importing chatbot after downloading nltk data to prevent error
         from ttc import Chatbot, Context
 
-        chatbot = Chatbot.from_file()
+        chatbot = Chatbot()
         sp.write("- Brain loaded")
 
         sp.ok("✔")
 
-    if chatbot.new_data:
-        Sender.success(
-            "Thomas learns as you speak to him.\n" "Save his brain by typing 's'."
-        )
+    Sender.success(
+        "\nThomas learns as you speak to him.\nSave his brain by typing 's'.\n"
+    )
 
     # Creating the user's context
     ctx = Context()
@@ -95,12 +93,11 @@ def start():
             continue
 
         with yaspin(color="yellow") as spinner:
-            mesh_id, r_id, r = chatbot.respond(ctx, text)
-
-            ctx.save_message(r_id, mesh_id)
+            resp = chatbot.respond(ctx, text)
 
             spinner.stop()
 
-            if r is not None:
-                # Sending the response
-                Sender.thomas(f"Thomas: {' '.join(r)}")
+            ctx.save_resp(resp)
+
+            # Sending the response
+            Sender.thomas(f"Thomas: {resp}")

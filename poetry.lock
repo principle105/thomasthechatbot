@@ -1,63 +1,10 @@
 [[package]]
-name = "aiohttp"
-version = "3.8.1"
-description = "Async http client/server framework (asyncio)"
-category = "main"
-optional = true
-python-versions = ">=3.6"
-
-[package.dependencies]
-aiosignal = ">=1.1.2"
-async-timeout = ">=4.0.0a3,<5.0"
-attrs = ">=17.3.0"
-charset-normalizer = ">=2.0,<3.0"
-frozenlist = ">=1.1.1"
-multidict = ">=4.5,<7.0"
-yarl = ">=1.0,<2.0"
-
-[package.extras]
-speedups = ["aiodns", "brotli", "cchardet"]
-
-[[package]]
-name = "aiosignal"
-version = "1.2.0"
-description = "aiosignal: a list of registered asynchronous callbacks"
-category = "main"
-optional = true
-python-versions = ">=3.6"
-
-[package.dependencies]
-frozenlist = ">=1.1.0"
-
-[[package]]
 name = "anyascii"
 version = "0.3.1"
 description = "Unicode to ASCII transliteration"
 category = "main"
 optional = false
 python-versions = ">=3.3"
-
-[[package]]
-name = "async-timeout"
-version = "4.0.2"
-description = "Timeout context manager for asyncio programs"
-category = "main"
-optional = true
-python-versions = ">=3.6"
-
-[[package]]
-name = "attrs"
-version = "22.1.0"
-description = "Classes Without Boilerplate"
-category = "main"
-optional = true
-python-versions = ">=3.5"
-
-[package.extras]
-dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
-docs = ["furo", "sphinx", "zope.interface", "sphinx-notfound-page"]
-tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
-tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "cloudpickle"]
 
 [[package]]
 name = "black"
@@ -80,17 +27,6 @@ colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.7.4)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
-
-[[package]]
-name = "charset-normalizer"
-version = "2.1.1"
-description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-category = "main"
-optional = true
-python-versions = ">=3.6.0"
-
-[package.extras]
-unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
@@ -123,44 +59,11 @@ python-versions = "*"
 textsearch = ">=0.0.21"
 
 [[package]]
-name = "discord.py"
-version = "2.0.1"
-description = "A Python wrapper for the Discord API"
-category = "main"
-optional = true
-python-versions = ">=3.8.0"
-
-[package.dependencies]
-aiohttp = ">=3.7.4,<4"
-
-[package.extras]
-voice = ["PyNaCl (>=1.3.0,<1.6)"]
-test = ["typing-extensions (>=4.3,<5)", "pytest-mock", "pytest-cov", "pytest-asyncio", "pytest", "coverage"]
-speed = ["cchardet (==2.1.7)", "brotli", "aiodns (>=1.1)", "orjson (>=3.5.4)"]
-docs = ["typing-extensions (>=4.3,<5)", "sphinxcontrib-websupport", "sphinxcontrib-trio (==1.1.2)", "sphinx (==4.4.0)"]
-
-[[package]]
-name = "frozenlist"
-version = "1.3.1"
-description = "A list-like structure which implements collections.abc.MutableSequence"
-category = "main"
-optional = true
-python-versions = ">=3.7"
-
-[[package]]
-name = "idna"
-version = "3.3"
-description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
-optional = true
-python-versions = ">=3.5"
-
-[[package]]
 name = "inquirerpy"
 version = "0.3.4"
 description = "Python port of Inquirer.js (A collection of common interactive command-line user interfaces)"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
@@ -191,14 +94,6 @@ description = "Lightweight pipelining with Python functions"
 category = "main"
 optional = false
 python-versions = ">=3.6"
-
-[[package]]
-name = "multidict"
-version = "6.0.2"
-description = "multidict implementation"
-category = "main"
-optional = true
-python-versions = ">=3.7"
 
 [[package]]
 name = "mypy-extensions"
@@ -243,7 +138,7 @@ name = "pfzy"
 version = "0.3.4"
 description = "Python port of the fzy fuzzy string matching algorithm"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7,<4.0"
 
 [package.extras]
@@ -266,7 +161,7 @@ name = "prompt-toolkit"
 version = "3.0.31"
 description = "Library for building powerful interactive command lines in Python"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6.2"
 
 [package.dependencies]
@@ -276,14 +171,6 @@ wcwidth = "*"
 name = "pyahocorasick"
 version = "1.4.4"
 description = "pyahocorasick is a fast and memory efficient library for exact or approximate multi-pattern string search.  With the \"ahocorasick.Automaton\" class, you can find multiple key string occurrences at once in some input text.  You can use it as a plain dict-like Trie or convert a Trie to an automaton for efficient Aho-Corasick search. And pickle to disk for easy reuse of large automatons. Implemented in C and tested on Python 3.6+. Works on Linux, macOS and Windows. BSD-3-Cause license."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "python-decouple"
-version = "3.6"
-description = "Strict separation of settings from code."
 category = "main"
 optional = false
 python-versions = "*"
@@ -301,7 +188,7 @@ name = "termcolor-whl"
 version = "1.1.2"
 description = "ANSI Color formatting for output in terminal, successor to termcolor (has wheels!)"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.6"
 
 [[package]]
@@ -346,7 +233,7 @@ name = "typer"
 version = "0.6.1"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -371,59 +258,34 @@ name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
-
-[[package]]
-name = "yarl"
-version = "1.8.1"
-description = "Yet another URL library"
-category = "main"
-optional = true
-python-versions = ">=3.7"
-
-[package.dependencies]
-idna = ">=2.0"
-multidict = ">=4.0"
 
 [[package]]
 name = "yaspin"
 version = "2.2.0"
 description = "Yet Another Terminal Spinner"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7.2,<4.0.0"
 
 [package.dependencies]
 termcolor-whl = "1.1.2"
 
-[extras]
-bot = ["discord.py"]
-cli = ["inquirerpy", "typer", "yaspin"]
-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "8f14dcb3e2d2df8530e11984925594125ccaddf9839a34014bc0efddf52d5fb7"
+content-hash = "8c1a93473daf696416ad20c632cadb9a151a7886f9a6dc246563cfdb019447f6"
 
 [metadata.files]
-aiohttp = []
-aiosignal = []
 anyascii = []
-async-timeout = []
-attrs = []
 black = []
-charset-normalizer = []
 click = []
 colorama = []
 contractions = []
-"discord.py" = []
-frozenlist = []
-idna = []
 inquirerpy = []
 isort = []
 joblib = []
-multidict = []
 mypy-extensions = []
 nltk = []
 pathspec = []
@@ -431,7 +293,6 @@ pfzy = []
 platformdirs = []
 prompt-toolkit = []
 pyahocorasick = []
-python-decouple = []
 regex = []
 termcolor-whl = []
 textsearch = []
@@ -440,5 +301,4 @@ tqdm = []
 typer = []
 typing-extensions = []
 wcwidth = []
-yarl = []
 yaspin = []
