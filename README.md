@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://i.imgur.com/1qHopDH.png" alt="Thomas" width="220" height="220">
+    <img src="https://i.imgur.com/hA9YF2s.png" alt="Thomas" width="220" height="220">
     <h1>Thomas the Chatbot</h1>
 </div>
 
