@@ -83,7 +83,7 @@ Previous responses are stored in `resps.json` as a dictionary where the key is a
 
 ### Mesh
 
-Prompts are associated with responses through a "mesh" which is stored in `mesh.thomas`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links associate responses to patterns of words, they have the following attributes:
+Prompts are associated with responses through a "mesh" which is stored in `mesh.json`. The mesh consists of a dictionary where the key is the UUID of the prompt and the value is a "link". Links associate responses to patterns of words, they have the following attributes:
 
 `stop_words: set`
 Stop words separated from the tokenized prompt.
