@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Callable
 
 import contractions
 from nltk import pos_tag, word_tokenize
+from spellchecker import SpellChecker
 
 if TYPE_CHECKING:
     from .context import Context
@@ -255,6 +256,9 @@ class Chatbot:
         self.tag_map = self.create_tag_map()
         self.wl = WordNetLemmatizer()
 
+        # Spelling checking
+        self.spell = SpellChecker()
+
         self.all_stop_words = set(stopwords.words("english"))
 
     def create_tag_map(self):
@@ -276,7 +280,12 @@ class Chatbot:
         # Removing punctuation
         text = text.translate(str.maketrans("", "", string.punctuation))
 
-        return word_tokenize(text)
+        corrected = []
+
+        for w in word_tokenize(text):
+            corrected.append(self.spell.correction(w))
+
+        return corrected
 
     def lemmatize_tokens(self, tokens: list):
         for token, tag in pos_tag(tokens):
