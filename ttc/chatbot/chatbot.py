@@ -30,6 +30,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Callable
 
 import contractions
+from fastpunct import FastPunct
 from nltk import pos_tag, word_tokenize
 from spellchecker import SpellChecker
 
@@ -259,6 +260,9 @@ class Chatbot:
         # Spelling checking
         self.spell = SpellChecker()
 
+        # Punctuation Restoration
+        self.punct = FastPunct()
+
         self.all_stop_words = set(stopwords.words("english"))
 
     def create_tag_map(self):
@@ -271,6 +275,13 @@ class Chatbot:
 
         return tag_map
 
+    def create_response(
+        self, resp: list[str], resp_id: str, mesh_id: str = None
+    ) -> Response:
+        joined_resp = self.punct.punct([" ".join(resp)])[0]
+
+        return Response(resp=joined_resp, resp_id=resp_id, mesh_id=mesh_id)
+
     def tokenize_msg(self, msg: str) -> tuple[set]:
         text = msg.lower()
 
@@ -280,10 +291,8 @@ class Chatbot:
         # Removing punctuation
         text = text.translate(str.maketrans("", "", string.punctuation))
 
-        corrected = []
-
-        for w in word_tokenize(text):
-            corrected.append(self.spell.correction(w))
+        # Spelling correction
+        corrected = [self.spell.correction(w) or w for w in word_tokenize(text)]
 
         return corrected
 
@@ -427,9 +436,7 @@ class Chatbot:
                 # Picking a random response
                 resp_id = random.choice(resp_ids)
 
-                resp = " ".join(prev_meshes[resp_id])
-
-                return Response(resp=resp, resp_id=resp_id)
+                return self.create_response(resp=prev_meshes[resp_id], resp_id=resp_id)
 
         # Finding elligible meshes from keywords
         results = self.find_elligible_meshes(results, self.score_threshold)
@@ -488,9 +495,7 @@ class Chatbot:
 
         resp = self.resps.get_resp_from_id(resp_id)
 
-        resp = " ".join(resp)
-
-        return Response(resp=resp, resp_id=resp_id, mesh_id=mesh_id)
+        return self.create_response(resp=resp, resp_id=resp_id, mesh_id=mesh_id)
 
     def save_data(self):
         self.mesh.save_data(self.path)

@@ -19,6 +19,8 @@ inquirerpy = "^0.3.4"
 typer = "^0.6.1"
 yaspin = "^2.2.0"
 pyspellchecker = "^0.7.0"
+torch = "1.12.1"
+fastpunct = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
